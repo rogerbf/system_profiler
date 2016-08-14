@@ -1,0 +1,10 @@
+node_modules
+dist
+.DS_Store
+package
+system_profiler*.tgz
+npm-debug.log
+man_entry
+dump.xml
+result.json
+dump
