@@ -35,6 +35,5 @@
     ]
   },
   "dependencies": {
-    "plist": "1.2.0"
   }
 }
