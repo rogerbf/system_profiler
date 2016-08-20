@@ -1,18 +1,30 @@
 const system_profiler = require('./lib/bin.js')
+const inspect = require('util').inspect
 
-system_profiler()
+system_profiler('SPUSBDataType')
   .then(data => {
-    console.log(
-      data
-        .split('\n')
-        .slice(1)
-        .filter(line => line.length > 0)
-        .map(line => {
-          return {
-            indentation: line.slice(0, line.match(/\w/).index).length,
-            text: line.trim()
+
+    const processed = data
+      .split('\n')
+      .reduce((accumulator, line, i, arr) => {
+        if (line.length > 0) {
+          if (line[line.length - 1] === ':') {
+            return accumulator.concat(
+              `"${accumulator[accumulator.length - 1] === '\n' ? '}' : ''}${line.trim().slice(0, -1)}" : {`
+              )
           }
-        })
-    )
+          else {
+            return accumulator.concat(
+              `"${line.slice(0, line.indexOf(':')).trim()}":"${line.slice(line.indexOf(':') + 1).trim()}",`
+            )
+          }
+        }
+        else {
+          return accumulator
+        }
+      }, '').concat('}')
+
+    console.log(processed)
+
   })
   .catch(err => console.error(error))
