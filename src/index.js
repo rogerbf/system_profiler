@@ -2,6 +2,8 @@ const system_profiler = require('./lib/bin.js')
 
 system_profiler('SPUSBDataType')
   .then(data => {
+    let lastParentIndentation = 0
+    let unClosedObjects = 0
     const processed = (
     '{'.concat(data
       .split('\n')
@@ -10,6 +12,8 @@ system_profiler('SPUSBDataType')
       .reduce((accumulator, current, i, arr) => {
         if (i === 0) {
           if (current.parent) {
+            lastParentIndentation = current.indentation
+            unClosedObjects++
             return `"${current.key}": {`
           } else {
             return `{ "${current.key}" : "${current.value}" }`
@@ -19,6 +23,8 @@ system_profiler('SPUSBDataType')
           const next = arr[i + 1]
           if (previous.parent) {
             if (current.parent) {
+              lastParentIndentation = current.indentation
+              unClosedObjects++
               return accumulator.concat(`"${current.key}": {`)
             } else {
                 if (next !== undefined && next.parent) {
@@ -29,19 +35,30 @@ system_profiler('SPUSBDataType')
             }
           } else {
             if (current.parent) {
-              return accumulator.concat(`}, "${current.key}" : {`)
+              if (current.indentation > lastParentIndentation) {
+                unClosedObjects++
+                return accumulator.concat(`,"${current.key}" : {`)
+              } else {
+                return accumulator.concat(`}, "${current.key}" : {`)
+              }
             } else {
                 if (next !== undefined && next.parent) {
-                  return accumulator.concat(`"${current.key}" : "${current.value}"`)
+                  if (next.indentation < current.indentation) {
+                    unClosedObjects--
+                    return accumulator.concat(`"${current.key}" : "${current.value}"}`)
+                  } else {
+                    return accumulator.concat(`"${current.key}" : "${current.value}"`)
+                  }
                 } else {
                   return accumulator.concat(`"${current.key}" : "${current.value}",`)
                 }
             }
           }
         }
-      }, '').slice(0, -1).concat('}}')).concat('}')
+      }, '').slice(0, -1).concat(Array(unClosedObjects).fill('}').join(''))).concat('}')
     )
-    console.log(JSON.stringify(JSON.parse(processed), null, 2))
+    // console.log(JSON.stringify(JSON.parse(processed), null, 2))
+    process.stdout.write(processed)
   })
   .catch(err => console.error(error))
 
