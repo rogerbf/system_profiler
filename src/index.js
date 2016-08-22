@@ -1,5 +1,4 @@
 const system_profiler = require('./lib/bin.js')
-const inspect = require('util').inspect
 
 system_profiler('SPUSBDataType')
   .then(data => {
@@ -59,8 +58,7 @@ const separateAttributes = line => {
       indentation: line.slice(0, line.match(/\w/).index).length,
       key: line.slice(0, line.indexOf(':')).trim(),
       value: {},
-      parent: true,
-      children: []
+      parent: true
     }
   }
 }
