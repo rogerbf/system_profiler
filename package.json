@@ -34,6 +34,8 @@
       "es2015"
     ]
   },
-  "dependencies": {
+  "dependencies": {},
+  "bin": {
+    "system_profiler": "./dist/bin/cli.js"
   }
 }
